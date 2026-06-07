@@ -1,0 +1,765 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sm1leTest — Buyurtma</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#2C1810;--card:#4A2C1A;--card2:#5C3820;
+  --border:rgba(255,200,140,0.15);--gold:#E8A030;--gold2:#F5C842;
+  --cream:#FFF3E0;--red:#FF6B6B;--green:#56D17E;
+  --text:#FFF3E0;--muted:#C49A72;--light:#E8C9A0;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);background-image:radial-gradient(ellipse at 20% 10%,rgba(139,69,19,0.4) 0%,transparent 50%),radial-gradient(ellipse at 80% 80%,rgba(232,160,48,0.12) 0%,transparent 50%);color:var(--text);font-family:'Nunito',sans-serif;min-height:100vh;padding-bottom:60px;}
+
+/* LOADING */
+.loading{position:fixed;inset:0;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:2000;}
+.loading-logo{font-family:'Playfair Display',serif;font-size:2.5rem;font-weight:900;color:var(--gold2);animation:pulse 1.5s ease-in-out infinite;}
+.loading-logo span{color:var(--cream);}
+.loading-text{font-size:0.8rem;color:var(--muted);margin-top:16px;letter-spacing:2px;}
+
+/* LOGIN */
+.login-screen{position:fixed;inset:0;background:var(--bg);background-image:radial-gradient(ellipse at 30% 20%,rgba(139,69,19,0.5) 0%,transparent 60%);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;z-index:1000;}
+.login-logo{font-family:'Playfair Display',serif;font-size:2.8rem;font-weight:900;color:var(--gold2);margin-bottom:6px;}
+.login-logo span{color:var(--cream);}
+.login-sub{font-size:0.76rem;letter-spacing:3px;text-transform:uppercase;color:var(--muted);margin-bottom:32px;}
+.login-box{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:28px 22px;width:100%;max-width:380px;}
+.login-title{font-family:'Playfair Display',serif;font-size:1.15rem;font-weight:700;color:var(--light);margin-bottom:18px;text-align:center;}
+.lf{margin-bottom:13px;}
+.lf label{display:block;font-size:0.7rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:5px;}
+.lf input{width:100%;background:var(--card2);border:1.5px solid var(--border);border-radius:10px;padding:11px 13px;color:var(--text);font-family:'Nunito',sans-serif;font-size:0.93rem;outline:none;transition:border-color 0.25s;}
+.lf input:focus{border-color:var(--gold);}
+.lf input::placeholder{color:rgba(200,160,100,0.35);}
+.login-btn{width:100%;background:linear-gradient(135deg,var(--gold),var(--gold2));color:#2C1810;border:none;border-radius:11px;padding:13px;font-family:'Playfair Display',serif;font-size:1rem;font-weight:700;cursor:pointer;transition:all 0.3s;margin-top:4px;box-shadow:0 6px 20px rgba(232,160,48,0.3);}
+.login-btn:hover{transform:translateY(-2px);}
+.login-err{color:var(--red);font-size:0.78rem;text-align:center;margin-top:9px;min-height:18px;}
+.login-switch{text-align:center;margin-top:14px;font-size:0.8rem;color:var(--muted);}
+.login-switch a{color:var(--gold);cursor:pointer;font-weight:700;}
+
+/* HEADER */
+.header{background:linear-gradient(135deg,#3D2314 0%,#5C3820 50%,#3D2314 100%);border-bottom:2px solid rgba(232,160,48,0.3);padding:14px 18px;position:relative;overflow:hidden;}
+.header::before{content:'';position:absolute;inset:0;background:repeating-linear-gradient(45deg,transparent,transparent 20px,rgba(232,160,48,0.03) 20px,rgba(232,160,48,0.03) 21px);}
+.header-top{display:flex;justify-content:space-between;align-items:center;position:relative;}
+.header-logo{font-family:'Playfair Display',serif;font-size:1.7rem;font-weight:900;color:var(--gold2);}
+.header-logo span{color:var(--cream);}
+.header-sub{font-size:0.68rem;color:var(--muted);letter-spacing:2.5px;text-transform:uppercase;margin-top:2px;position:relative;}
+.user-badge{background:rgba(232,160,48,0.12);border:1px solid rgba(232,160,48,0.25);border-radius:20px;padding:4px 11px;font-size:0.72rem;font-weight:700;color:var(--gold);}
+.admin-badge{background:rgba(86,209,126,0.12);border:1px solid rgba(86,209,126,0.25);border-radius:20px;padding:4px 11px;font-size:0.72rem;font-weight:700;color:var(--green);}
+.logout-btn{background:rgba(255,107,107,0.1);border:1px solid rgba(255,107,107,0.2);border-radius:20px;padding:4px 11px;font-size:0.7rem;font-weight:700;color:var(--red);cursor:pointer;font-family:'Nunito',sans-serif;margin-top:4px;}
+
+/* LAYOUT */
+.main{max-width:560px;margin:0 auto;padding:16px 13px;}
+.app-screen{display:none;}
+.app-screen.active{display:block;}
+
+/* ADMIN TABS */
+.admin-tabs{display:flex;background:var(--card);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:40;overflow-x:auto;}
+.atab{flex:1;padding:12px 6px;background:none;border:none;border-bottom:2px solid transparent;color:var(--muted);font-family:'Nunito',sans-serif;font-size:0.78rem;font-weight:700;cursor:pointer;white-space:nowrap;min-width:68px;text-align:center;transition:all 0.2s;}
+.atab.active{color:var(--gold);border-bottom-color:var(--gold);}
+
+/* SECTION */
+.section{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:16px;margin-bottom:11px;position:relative;overflow:hidden;}
+.section::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;border-radius:16px 16px 0 0;}
+.s-brown::before{background:linear-gradient(90deg,var(--gold),var(--gold2));}
+.s-green::before{background:linear-gradient(90deg,var(--green),#2DD4BF);}
+.s-blue::before{background:linear-gradient(90deg,#4F9CF9,#A78BFA);}
+.s-sum::before{background:linear-gradient(90deg,var(--gold2),var(--gold));}
+.s-red::before{background:linear-gradient(90deg,#FF6B6B,#FF9A3C);}
+.section-title{font-family:'Playfair Display',serif;font-size:0.78rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:11px;display:flex;align-items:center;gap:7px;}
+
+/* FIELDS */
+.field{margin-bottom:11px;}
+.field label{display:block;font-size:0.7rem;font-weight:700;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px;}
+.field input{width:100%;background:var(--card2);border:1.5px solid var(--border);border-radius:9px;padding:10px 13px;color:var(--text);font-family:'Nunito',sans-serif;font-size:0.93rem;font-weight:600;outline:none;transition:border-color 0.25s;}
+.field input:focus{border-color:var(--gold);}
+.field input::placeholder{color:rgba(200,160,100,0.35);}
+.phone-row{display:flex;}
+.phone-prefix{background:var(--card2);border:1.5px solid var(--border);border-right:none;border-radius:9px 0 0 9px;padding:10px 11px;font-size:0.93rem;font-weight:700;color:var(--gold);}
+.phone-row input{border-radius:0 9px 9px 0;border-left:none;}
+.date-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:7px;}
+.date-field label{display:block;font-size:0.66rem;font-weight:700;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:3px;}
+.date-field input{width:100%;background:var(--card2);border:1.5px solid var(--border);border-radius:9px;padding:9px;color:var(--text);font-family:'Nunito',sans-serif;font-size:0.88rem;font-weight:600;outline:none;transition:border-color 0.25s;text-align:center;}
+.date-field input:focus{border-color:var(--gold);}
+
+/* PRODUCTS */
+.product-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;}
+.prod-card{background:var(--card2);border:2px solid var(--border);border-radius:13px;padding:13px;cursor:pointer;transition:all 0.2s;position:relative;overflow:hidden;}
+.prod-card:hover{border-color:rgba(232,160,48,0.4);}
+.prod-card.selected{border-color:var(--gold);background:rgba(232,160,48,0.08);}
+.prod-card.selected::after{content:'✓';position:absolute;top:7px;right:9px;font-size:0.78rem;font-weight:800;color:var(--gold2);}
+.prod-emoji{font-size:2rem;text-align:center;margin-bottom:5px;display:block;}
+.prod-name{font-size:0.76rem;font-weight:700;color:var(--light);text-align:center;line-height:1.3;margin-bottom:9px;}
+.prod-narx-row{display:flex;align-items:center;gap:3px;margin-bottom:7px;}
+.prod-narx-row label{font-size:0.64rem;color:var(--muted);white-space:nowrap;}
+.prod-narx-row input{flex:1;background:rgba(44,24,16,0.6);border:1px solid var(--border);border-radius:6px;padding:4px 6px;color:var(--gold2);font-family:'Nunito',sans-serif;font-size:0.8rem;font-weight:700;outline:none;text-align:center;}
+.prod-narx-row input:focus{border-color:var(--gold);}
+.prod-check-row{display:flex;align-items:center;justify-content:center;margin-bottom:5px;}
+.checkmark{width:22px;height:22px;background:var(--card);border:2px solid var(--border);border-radius:5px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all 0.2s;font-size:0.82rem;}
+.prod-card.selected .checkmark{background:var(--gold);border-color:var(--gold);color:#2C1810;font-weight:900;}
+.count-wrap{display:flex;align-items:center;justify-content:center;background:rgba(44,24,16,0.6);border:1.5px solid var(--border);border-radius:7px;overflow:hidden;}
+.count-btn{background:none;border:none;color:var(--muted);font-size:1rem;font-weight:700;padding:4px 9px;cursor:pointer;transition:all 0.15s;line-height:1;}
+.count-btn:hover{background:rgba(232,160,48,0.15);color:var(--gold);}
+.count-input{width:44px;background:transparent;border:none;color:var(--text);font-family:'Nunito',sans-serif;font-size:0.95rem;font-weight:800;text-align:center;outline:none;padding:4px 0;}
+.count-unit{font-size:0.68rem;color:var(--muted);padding:0 5px;}
+
+/* SUM */
+.sum-box{background:linear-gradient(135deg,rgba(232,160,48,0.12),rgba(245,200,66,0.06));border:2px solid rgba(232,160,48,0.3);border-radius:14px;padding:16px;text-align:center;}
+.sum-label{font-size:0.76rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:7px;}
+.sum-value{font-family:'Playfair Display',serif;font-size:2.2rem;font-weight:900;color:var(--gold2);line-height:1;}
+.sum-breakdown{margin-top:11px;display:flex;flex-direction:column;gap:5px;}
+.sum-row{display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid var(--border);}
+.sum-row:last-child{border-bottom:none;}
+.sum-row-name{font-size:0.8rem;color:var(--light);}
+.sum-row-val{font-size:0.85rem;font-weight:700;color:var(--gold);}
+
+/* BUTTONS */
+.save-btn{width:100%;background:linear-gradient(135deg,var(--gold),var(--gold2));color:#2C1810;border:none;border-radius:13px;padding:15px;font-family:'Playfair Display',serif;font-size:1.05rem;font-weight:700;cursor:pointer;transition:all 0.3s;box-shadow:0 8px 22px rgba(232,160,48,0.32);}
+.save-btn:hover{transform:translateY(-2px);box-shadow:0 12px 30px rgba(232,160,48,0.42);}
+.toggle-btn{width:100%;background:transparent;border:1.5px solid var(--border);border-radius:11px;padding:11px;color:var(--muted);font-family:'Nunito',sans-serif;font-size:0.86rem;font-weight:700;cursor:pointer;transition:all 0.2s;margin-bottom:10px;}
+.toggle-btn:hover{border-color:var(--gold);color:var(--gold);}
+.btn-g{background:rgba(86,209,126,0.12);color:var(--green);border:1px solid rgba(86,209,126,0.22);border-radius:7px;padding:5px 10px;font-family:'Nunito',sans-serif;font-size:0.72rem;font-weight:700;cursor:pointer;transition:all 0.2s;margin:2px;}
+.btn-g:hover{background:rgba(86,209,126,0.22);}
+.btn-r{background:rgba(255,107,107,0.1);color:var(--red);border:1px solid rgba(255,107,107,0.2);border-radius:7px;padding:5px 10px;font-family:'Nunito',sans-serif;font-size:0.72rem;font-weight:700;cursor:pointer;transition:all 0.2s;margin:2px;}
+.btn-r:hover{background:rgba(255,107,107,0.22);}
+
+/* SETTINGS */
+.sett-row{display:flex;align-items:center;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--border);}
+.sett-row:last-child{border-bottom:none;}
+.sett-lbl{font-size:0.82rem;color:var(--light);}
+.sett-inp{width:95px;background:var(--card2);border:1.5px solid var(--border);border-radius:7px;padding:6px 9px;color:var(--gold2);font-family:'Nunito',sans-serif;font-size:0.88rem;font-weight:700;outline:none;text-align:center;}
+.sett-inp:focus{border-color:var(--gold);}
+
+/* MINI STATS */
+.mini-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:11px;}
+.mini-card{background:var(--card2);border:1px solid var(--border);border-radius:11px;padding:13px;text-align:center;}
+.mini-lbl{font-size:0.66rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:5px;}
+.mini-val{font-family:'Playfair Display',serif;font-size:0.98rem;font-weight:700;color:var(--gold2);line-height:1.2;word-break:break-word;}
+.mini-val.green{color:var(--green);}
+.mini-val.red{color:var(--red);}
+.mini-val.orange{color:#FF9A3C;}
+
+/* HISTORY */
+.hist-list{display:flex;flex-direction:column;gap:9px;}
+.hist-item{background:var(--card);border:1px solid var(--border);border-radius:13px;padding:13px;}
+.hist-item.paid{opacity:0.55;}
+.hist-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:7px;}
+.hist-mag{font-family:'Playfair Display',serif;font-size:0.98rem;font-weight:700;color:var(--cream);}
+.hist-meta{font-size:0.7rem;color:var(--muted);margin-top:2px;}
+.hist-prods{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:7px;}
+.hist-prod{background:var(--card2);border:1px solid var(--border);border-radius:5px;padding:2px 8px;font-size:0.72rem;color:var(--light);}
+.hist-prod span{color:var(--gold2);font-weight:800;}
+.hist-foot{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:5px;}
+.hist-sum{font-family:'Playfair Display',serif;font-size:1.05rem;font-weight:700;color:var(--gold2);}
+.hist-acts{display:flex;gap:3px;flex-wrap:wrap;}
+.badge-paid{display:inline-block;background:rgba(86,209,126,0.14);color:var(--green);border:1px solid rgba(86,209,126,0.22);border-radius:20px;padding:1px 8px;font-size:0.68rem;font-weight:700;}
+.badge-qarz{display:inline-block;background:rgba(255,107,107,0.12);color:var(--red);border:1px solid rgba(255,107,107,0.18);border-radius:20px;padding:1px 8px;font-size:0.68rem;font-weight:700;}
+.badge-user{display:inline-block;background:rgba(79,156,249,0.12);color:#4F9CF9;border:1px solid rgba(79,156,249,0.18);border-radius:20px;padding:1px 8px;font-size:0.68rem;font-weight:700;margin-left:3px;}
+
+/* XARAJAT */
+.x-row{display:flex;gap:7px;align-items:center;margin-bottom:7px;}
+.x-inp-nom{flex:2;background:var(--card2);border:1.5px solid var(--border);border-radius:8px;padding:8px 10px;color:var(--text);font-family:'Nunito',sans-serif;font-size:0.86rem;outline:none;}
+.x-inp-sum{flex:1.5;background:var(--card2);border:1.5px solid var(--border);border-radius:8px;padding:8px 10px;color:var(--gold2);font-family:'Nunito',sans-serif;font-size:0.86rem;font-weight:700;outline:none;text-align:center;}
+.x-inp-nom:focus,.x-inp-sum:focus{border-color:var(--gold);}
+.x-unit{font-size:0.72rem;color:var(--muted);white-space:nowrap;}
+.x-del{background:rgba(255,107,107,0.1);color:var(--red);border:1px solid rgba(255,107,107,0.2);border-radius:6px;padding:6px 9px;font-size:0.76rem;cursor:pointer;}
+
+/* MONTH */
+.month-row{display:flex;gap:7px;align-items:center;margin-bottom:12px;flex-wrap:wrap;}
+.month-row select,.month-row input[type=number]{background:var(--card2);border:1.5px solid var(--border);border-radius:8px;padding:7px 9px;color:var(--text);font-family:'Nunito',sans-serif;font-size:0.86rem;outline:none;}
+.month-row select option{background:var(--card2);}
+
+/* LIVE DOT */
+.live-dot{width:7px;height:7px;background:var(--green);border-radius:50%;display:inline-block;margin-right:5px;animation:blink 1.5s ease-in-out infinite;}
+
+/* TOAST */
+.toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--gold);color:#2C1810;padding:11px 26px;border-radius:50px;font-weight:800;font-size:0.88rem;transition:transform 0.35s ease;z-index:9999;pointer-events:none;white-space:nowrap;}
+.toast.show{transform:translateX(-50%) translateY(0);}
+
+@keyframes blink{0%,100%{opacity:1;}50%{opacity:0.3;}}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:0.4;}}
+</style>
+</head>
+<body>
+
+<!-- LOADING -->
+<div class="loading" id="loadingScreen">
+  <div class="loading-logo">Sm<span>1</span>leTest</div>
+  <div class="loading-text">YUKLANMOQDA...</div>
+</div>
+
+<!-- LOGIN -->
+<div class="login-screen" id="loginScreen" style="display:none;">
+  <div class="login-logo">Sm<span>1</span>leTest</div>
+  <div class="login-sub">Buyurtma Tizimi</div>
+  <div class="login-box">
+    <div class="login-title" id="loginTitle">🔐 Kirish</div>
+    <div id="formLogin">
+      <div class="lf"><label>Email</label><input type="email" id="loginEmail" placeholder="email@manzil.uz"></div>
+      <div class="lf"><label>Parol</label><input type="password" id="loginPass" placeholder="••••••••"></div>
+      <button class="login-btn" onclick="doLogin()">Kirish →</button>
+      <div class="login-err" id="loginErr"></div>
+      <div class="login-switch">Akkaunt yo'qmi? <a onclick="toReg()">Ro'yxatdan o'tish</a></div>
+    </div>
+    <div id="formReg" style="display:none;">
+      <div class="lf"><label>Ism</label><input type="text" id="regName" placeholder="Ismingiz"></div>
+      <div class="lf"><label>Email</label><input type="email" id="regEmail" placeholder="email@manzil.uz"></div>
+      <div class="lf"><label>Parol</label><input type="password" id="regPass" placeholder="Kamida 6 ta belgi"></div>
+      <button class="login-btn" onclick="doRegister()">Ro'yxatdan o'tish →</button>
+      <div class="login-err" id="regErr"></div>
+      <div class="login-switch">Akkaunt bormi? <a onclick="toLogin()">Kirish</a></div>
+    </div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="appScreen" style="display:none;">
+  <div class="header">
+    <div class="header-top">
+      <div>
+        <div class="header-logo">Sm<span>1</span>leTest</div>
+        <div class="header-sub">Buyurtma Tizimi</div>
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;">
+        <span id="userBadge" class="user-badge"></span>
+        <button class="logout-btn" onclick="doLogout()">Chiqish</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- WORKER -->
+  <div class="app-screen active" id="workerScreen">
+    <div class="main">
+
+      <div class="section s-brown">
+        <div class="section-title">🏪 Magazin</div>
+        <div class="field"><label>Magazin nomi</label><input type="text" id="magNom" placeholder="Baraka do'koni" oninput="calcSum()"></div>
+        <div class="field"><label>Telefon</label>
+          <div class="phone-row">
+            <div class="phone-prefix">+998</div>
+            <input type="tel" id="telefon" placeholder="90 000 00 00" maxlength="12" oninput="fmtPhone(this)">
+          </div>
+        </div>
+      </div>
+
+      <div class="section s-green">
+        <div class="section-title">🥟 Mahsulotlar</div>
+        <div class="product-grid">
+          <div class="prod-card" id="pc-tb" onclick="toggleProd('tb')">
+            <span class="prod-emoji">🟫</span>
+            <div class="prod-name">To'rt burchak Somsa</div>
+            <div class="prod-narx-row"><label>Narx:</label><input type="number" id="narx-tb" placeholder="—" onclick="event.stopPropagation()" oninput="calcSum()"><span style="font-size:0.62rem;color:var(--muted)">so'm</span></div>
+            <div class="prod-check-row"><div class="checkmark" id="chk-tb">✓</div></div>
+            <div class="count-wrap">
+              <button class="count-btn" onclick="event.stopPropagation();chg('tb',-1)">−</button>
+              <input class="count-input" type="number" id="val-tb" placeholder="0" min="0" oninput="calcSum()">
+              <span class="count-unit">dona</span>
+              <button class="count-btn" onclick="event.stopPropagation();chg('tb',1)">+</button>
+            </div>
+          </div>
+          <div class="prod-card" id="pc-yum" onclick="toggleProd('yum')">
+            <span class="prod-emoji">⚪</span>
+            <div class="prod-name">Yumaloq Somsa</div>
+            <div class="prod-narx-row"><label>Narx:</label><input type="number" id="narx-yum" placeholder="—" onclick="event.stopPropagation()" oninput="calcSum()"><span style="font-size:0.62rem;color:var(--muted)">so'm</span></div>
+            <div class="prod-check-row"><div class="checkmark" id="chk-yum">✓</div></div>
+            <div class="count-wrap">
+              <button class="count-btn" onclick="event.stopPropagation();chg('yum',-1)">−</button>
+              <input class="count-input" type="number" id="val-yum" placeholder="0" min="0" oninput="calcSum()">
+              <span class="count-unit">dona</span>
+              <button class="count-btn" onclick="event.stopPropagation();chg('yum',1)">+</button>
+            </div>
+          </div>
+          <div class="prod-card" id="pc-qat" onclick="toggleProd('qat')">
+            <span class="prod-emoji">🥐</span>
+            <div class="prod-name">Qatlama Xamir</div>
+            <div class="prod-narx-row"><label>Narx:</label><input type="number" id="narx-qat" placeholder="—" onclick="event.stopPropagation()" oninput="calcSum()"><span style="font-size:0.62rem;color:var(--muted)">so'm</span></div>
+            <div class="prod-check-row"><div class="checkmark" id="chk-qat">✓</div></div>
+            <div class="count-wrap">
+              <button class="count-btn" onclick="event.stopPropagation();chg('qat',-1)">−</button>
+              <input class="count-input" type="number" id="val-qat" placeholder="0" min="0" oninput="calcSum()">
+              <span class="count-unit">dona</span>
+              <button class="count-btn" onclick="event.stopPropagation();chg('qat',1)">+</button>
+            </div>
+          </div>
+          <div class="prod-card" id="pc-kich" onclick="toggleProd('kich')">
+            <span class="prod-emoji">🔵</span>
+            <div class="prod-name">Kichkina Yumaloq</div>
+            <div class="prod-narx-row"><label>Narx:</label><input type="number" id="narx-kich" placeholder="—" onclick="event.stopPropagation()" oninput="calcSum()"><span style="font-size:0.62rem;color:var(--muted)">so'm</span></div>
+            <div class="prod-check-row"><div class="checkmark" id="chk-kich">✓</div></div>
+            <div class="count-wrap">
+              <button class="count-btn" onclick="event.stopPropagation();chg('kich',-1)">−</button>
+              <input class="count-input" type="number" id="val-kich" placeholder="0" min="0" oninput="calcSum()">
+              <span class="count-unit">dona</span>
+              <button class="count-btn" onclick="event.stopPropagation();chg('kich',1)">+</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section s-blue">
+        <div class="section-title">📅 Sana</div>
+        <div class="date-row">
+          <div class="date-field"><label>Kun</label><input type="number" id="d-kun" min="1" max="31"></div>
+          <div class="date-field"><label>Oy</label><input type="number" id="d-oy" min="1" max="12"></div>
+          <div class="date-field"><label>Yil</label><input type="number" id="d-yil" min="2020"></div>
+        </div>
+      </div>
+
+      <div class="section s-red">
+        <div class="section-title">💸 Xarajatlar</div>
+        <div id="xList"><div style="text-align:center;color:var(--muted);font-size:0.8rem;padding:8px;">Hozircha xarajat yo'q</div></div>
+        <button onclick="addX()" style="width:100%;background:rgba(255,107,107,0.1);color:var(--red);border:1px solid rgba(255,107,107,0.2);border-radius:9px;padding:9px;font-family:'Nunito',sans-serif;font-size:0.82rem;font-weight:700;cursor:pointer;">+ Xarajat qo'shish</button>
+      </div>
+
+      <div class="section s-sum">
+        <div class="sum-box">
+          <div class="sum-label">Jami Summa</div>
+          <div class="sum-value" id="sumVal">—</div>
+          <div class="sum-breakdown" id="sumBd"><div style="color:var(--muted);font-size:0.8rem;text-align:center;padding:5px;">Mahsulot tanlanmagan</div></div>
+        </div>
+      </div>
+
+      <button class="save-btn" onclick="saveOrder()">💾 Saqlash</button>
+
+      <button class="toggle-btn" onclick="toggleSett()" style="margin-top:11px;" id="settBtn">⚙️ Narxlarni Sozlash</button>
+      <div id="settPanel" style="display:none;">
+        <div class="section s-brown" style="margin-bottom:0;">
+          <div class="section-title">⚙️ Standart Narxlar</div>
+          <p style="font-size:0.74rem;color:var(--muted);margin-bottom:11px;">Bir marta kiritilsa — har safar avtomatik chiqadi.</p>
+          <div class="sett-row"><span class="sett-lbl">🟫 To'rt burchak</span><div style="display:flex;align-items:center;gap:5px;"><input class="sett-inp" type="number" id="sett-tb" placeholder="—" oninput="applyNarx()"><span style="font-size:0.74rem;color:var(--muted)">so'm</span></div></div>
+          <div class="sett-row"><span class="sett-lbl">⚪ Yumaloq</span><div style="display:flex;align-items:center;gap:5px;"><input class="sett-inp" type="number" id="sett-yum" placeholder="—" oninput="applyNarx()"><span style="font-size:0.74rem;color:var(--muted)">so'm</span></div></div>
+          <div class="sett-row"><span class="sett-lbl">🥐 Qatlama</span><div style="display:flex;align-items:center;gap:5px;"><input class="sett-inp" type="number" id="sett-qat" placeholder="—" oninput="applyNarx()"><span style="font-size:0.74rem;color:var(--muted)">so'm</span></div></div>
+          <div class="sett-row"><span class="sett-lbl">🔵 Kichkina</span><div style="display:flex;align-items:center;gap:5px;"><input class="sett-inp" type="number" id="sett-kich" placeholder="—" oninput="applyNarx()"><span style="font-size:0.74rem;color:var(--muted)">so'm</span></div></div>
+          <button class="save-btn" style="margin-top:12px;" onclick="saveNarxlar()">💾 Narxlarni Saqlash</button>
+        </div>
+      </div>
+
+      <button class="toggle-btn" onclick="toggleMyHist()" style="margin-top:8px;" id="myHistBtn">📋 Mening buyurtmalarim</button>
+      <div id="myHistPanel" style="display:none;"><div class="hist-list" id="myHistList"></div></div>
+    </div>
+  </div>
+
+  <!-- ADMIN -->
+  <div class="app-screen" id="adminScreen">
+    <div class="admin-tabs">
+      <button class="atab active" onclick="aTab('orders',this)">📋 Buyurtmalar</button>
+      <button class="atab" onclick="aTab('stats',this)">📊 Statistika</button>
+      <button class="atab" onclick="aTab('narx',this)">⚙️ Narxlar</button>
+    </div>
+
+    <div class="main" id="aTabOrders">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:11px;flex-wrap:wrap;gap:7px;">
+        <div style="font-family:'Playfair Display',serif;font-size:0.95rem;font-weight:700;"><span class="live-dot"></span>Real vaqt</div>
+        <div style="display:flex;gap:5px;">
+          <button class="btn-g" onclick="admFilter('all')">Hammasi</button>
+          <button class="btn-r" onclick="admFilter('pending')">Qarz</button>
+          <button class="btn-g" onclick="admFilter('paid')">To'langan</button>
+        </div>
+      </div>
+      <div id="admOrders"><div style="text-align:center;color:var(--muted);padding:36px;font-size:0.84rem;">Yuklanmoqda...</div></div>
+    </div>
+
+    <div class="main" id="aTabStats" style="display:none;">
+      <div class="month-row">
+        <select id="statOy"><option value="0">Yanvar</option><option value="1">Fevral</option><option value="2">Mart</option><option value="3">Aprel</option><option value="4">May</option><option value="5">Iyun</option><option value="6">Iyul</option><option value="7">Avgust</option><option value="8">Sentyabr</option><option value="9">Oktyabr</option><option value="10">Noyabr</option><option value="11">Dekabr</option></select>
+        <input type="number" id="statYil" style="width:76px;">
+        <button onclick="calcStats()" style="background:var(--gold);color:#2C1810;border:none;border-radius:8px;padding:7px 13px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.82rem;cursor:pointer;">Ko'rish</button>
+      </div>
+      <div style="font-size:0.68rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:7px;">📅 Bugun</div>
+      <div class="mini-grid">
+        <div class="mini-card"><div class="mini-lbl">Tushum</div><div class="mini-val green" id="st-kt">—</div></div>
+        <div class="mini-card"><div class="mini-lbl">Xarajat</div><div class="mini-val red" id="st-kx">—</div></div>
+        <div class="mini-card"><div class="mini-lbl">Foyda</div><div class="mini-val" id="st-kf">—</div></div>
+        <div class="mini-card"><div class="mini-lbl">To'lanmagan</div><div class="mini-val orange" id="st-kq">—</div></div>
+      </div>
+      <div style="font-size:0.68rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin:11px 0 7px;">📆 Oylik</div>
+      <div class="mini-grid">
+        <div class="mini-card"><div class="mini-lbl">Jami Tushum</div><div class="mini-val green" id="st-ot">—</div></div>
+        <div class="mini-card"><div class="mini-lbl">Xarajat</div><div class="mini-val red" id="st-ox">—</div></div>
+        <div class="mini-card"><div class="mini-lbl">Foyda</div><div class="mini-val" id="st-of">—</div></div>
+        <div class="mini-card"><div class="mini-lbl">To'lanmagan</div><div class="mini-val orange" id="st-oq">—</div></div>
+      </div>
+      <div class="mini-grid">
+        <div class="mini-card"><div class="mini-lbl">To'langan</div><div class="mini-val green" id="st-pc">—</div></div>
+        <div class="mini-card"><div class="mini-lbl">Qarz soni</div><div class="mini-val orange" id="st-uc">—</div></div>
+      </div>
+    </div>
+
+    <div class="main" id="aTabNarx" style="display:none;">
+      <div class="section s-brown">
+        <div class="section-title">⚙️ Narxlar (barcha foydalanuvchilarga)</div>
+        <div class="sett-row"><span class="sett-lbl">🟫 To'rt burchak</span><div style="display:flex;align-items:center;gap:5px;"><input class="sett-inp" type="number" id="an-tb" placeholder="—"><span style="font-size:0.74rem;color:var(--muted)">so'm</span></div></div>
+        <div class="sett-row"><span class="sett-lbl">⚪ Yumaloq</span><div style="display:flex;align-items:center;gap:5px;"><input class="sett-inp" type="number" id="an-yum" placeholder="—"><span style="font-size:0.74rem;color:var(--muted)">so'm</span></div></div>
+        <div class="sett-row"><span class="sett-lbl">🥐 Qatlama</span><div style="display:flex;align-items:center;gap:5px;"><input class="sett-inp" type="number" id="an-qat" placeholder="—"><span style="font-size:0.74rem;color:var(--muted)">so'm</span></div></div>
+        <div class="sett-row"><span class="sett-lbl">🔵 Kichkina</span><div style="display:flex;align-items:center;gap:5px;"><input class="sett-inp" type="number" id="an-kich" placeholder="—"><span style="font-size:0.74rem;color:var(--muted)">so'm</span></div></div>
+        <button class="save-btn" style="margin-top:13px;" onclick="saveAdmNarx()">💾 Saqlash va Tarqatish</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script type="module">
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged, updateProfile } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
+import { getFirestore, collection, addDoc, doc, updateDoc, deleteDoc, onSnapshot, query, orderBy, serverTimestamp, getDoc, setDoc } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+
+// ===== FIREBASE CONFIG =====
+const app = initializeApp({
+  apiKey: "AIzaSyDj7AMxDtcCEDlOIRS2IQ9G4G_Ii9jx0xE",
+  authDomain: "smile-testa-559e0.firebaseapp.com",
+  projectId: "smile-testa-559e0",
+  storageBucket: "smile-testa-559e0.firebasestorage.app",
+  messagingSenderId: "692009173921",
+  appId: "1:692009173921:web:0622a5700953206e4fc1e0",
+  measurementId: "G-5E26X7YHTJ"
+});
+const auth = getAuth(app);
+const db  = getFirestore(app);
+const ADMIN = 'admin@sm1letest.uz';
+
+// ===== UTILS =====
+const fmt  = n => Math.round(n).toLocaleString('uz-UZ') + ' so\'m';
+const fmtV = n => n >= 1000000 ? (n/1000000).toFixed(2)+' mln' : Math.round(n).toLocaleString('uz-UZ');
+const el   = id => document.getElementById(id);
+const show = (id,v) => { el(id).style.display = v||'block'; };
+const hide = id => { el(id).style.display = 'none'; };
+function toast(msg) {
+  const t = el('toast'); t.textContent = msg; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2400);
+}
+function showErr(id, msg) { el(id).textContent = msg; }
+
+// ===== VARS =====
+let CU = null, isAdmin = false, unsub = null, admAllOrders = [], admCurFilter = 'all';
+const PRODS = ['tb','yum','qat','kich'];
+const sel = {tb:false, yum:false, qat:false, kich:false};
+let xRows = [];
+
+// ===== AUTH STATE =====
+onAuthStateChanged(auth, async user => {
+  hide('loadingScreen');
+  if (user) {
+    CU = user; isAdmin = user.email === ADMIN;
+    hide('loginScreen'); show('appScreen');
+    if (isAdmin) {
+      el('userBadge').textContent = '👑 Admin';
+      el('userBadge').className = 'admin-badge';
+      hide('workerScreen'); el('adminScreen').classList.add('active');
+      const now = new Date();
+      el('statOy').value = now.getMonth();
+      el('statYil').value = now.getFullYear();
+      startListen();
+      loadAdmNarx();
+    } else {
+      const name = user.displayName || user.email.split('@')[0];
+      el('userBadge').textContent = '👤 ' + name;
+      el('userBadge').className = 'user-badge';
+      el('workerScreen').classList.add('active');
+      hide('adminScreen');
+      initDate();
+      loadNarxlar();
+    }
+  } else {
+    CU = null; isAdmin = false;
+    if (unsub) { unsub(); unsub = null; }
+    hide('appScreen'); show('loginScreen');
+    hide('formReg'); show('formLogin');
+    el('loginTitle').textContent = '🔐 Kirish';
+  }
+});
+
+// ===== AUTH ACTIONS =====
+window.doLogin = async () => {
+  const email = el('loginEmail').value.trim();
+  const pass  = el('loginPass').value;
+  showErr('loginErr','');
+  if (!email||!pass) { showErr('loginErr','Email va parol kiriting!'); return; }
+  try { await signInWithEmailAndPassword(auth, email, pass); }
+  catch { showErr('loginErr','Email yoki parol noto\'g\'ri!'); }
+};
+window.doRegister = async () => {
+  const name  = el('regName').value.trim();
+  const email = el('regEmail').value.trim();
+  const pass  = el('regPass').value;
+  showErr('regErr','');
+  if (!name||!email||!pass) { showErr('regErr','Barcha maydonlarni to\'ldiring!'); return; }
+  if (pass.length < 6) { showErr('regErr','Parol kamida 6 ta belgi!'); return; }
+  try {
+    const c = await createUserWithEmailAndPassword(auth, email, pass);
+    await updateProfile(c.user, { displayName: name });
+  } catch(e) {
+    showErr('regErr', e.code==='auth/email-already-in-use' ? 'Bu email allaqachon ro\'yxatda!' : 'Xatolik!');
+  }
+};
+window.doLogout = async () => { if (unsub) unsub(); await signOut(auth); };
+window.toReg = () => { hide('formLogin'); show('formReg'); el('loginTitle').textContent = '📝 Ro\'yxatdan o\'tish'; };
+window.toLogin = () => { show('formLogin'); hide('formReg'); el('loginTitle').textContent = '🔐 Kirish'; };
+
+// ===== PRODUCT TOGGLE =====
+window.toggleProd = id => {
+  sel[id] = !sel[id];
+  el('pc-'+id).classList.toggle('selected', sel[id]);
+  const chk = el('chk-'+id);
+  chk.style.background    = sel[id] ? 'var(--gold)' : '';
+  chk.style.color         = sel[id] ? '#2C1810' : '';
+  chk.style.borderColor   = sel[id] ? 'var(--gold)' : '';
+  calcSum();
+};
+window.chg = (id, d) => {
+  const inp = el('val-'+id);
+  const v = Math.max(0, (parseInt(inp.value)||0) + d);
+  inp.value = v > 0 ? v : '';
+  if (v > 0 && !sel[id]) toggleProd(id);
+  if (v === 0 && sel[id]) toggleProd(id);
+  calcSum();
+};
+window.fmtPhone = inp => { let v = inp.value.replace(/\D/g,''); if(v.length>9) v=v.slice(0,9); inp.value=v; };
+
+// ===== CALC SUM =====
+const NAMES = {tb:"To'rt burchak", yum:"Yumaloq", qat:"Qatlama", kich:"Kichkina yumaloq"};
+window.calcSum = () => {
+  let total = 0; const rows = [];
+  PRODS.forEach(id => {
+    const dona = parseInt(el('val-'+id).value)||0;
+    const narx = parseFloat(el('narx-'+id).value)||0;
+    const s = dona*narx;
+    if (dona>0) { total+=s; rows.push({nom:NAMES[id],dona,narx,s}); }
+  });
+  const sv = el('sumVal');
+  if (total>0) { sv.textContent=fmt(total); sv.style.color='var(--gold2)'; sv.style.fontSize='2.2rem'; }
+  else { sv.textContent='—'; sv.style.color='var(--muted)'; sv.style.fontSize='1.5rem'; }
+  const bd = el('sumBd');
+  if (!total) { bd.innerHTML='<div style="color:var(--muted);font-size:0.8rem;text-align:center;padding:5px;">Mahsulot tanlanmagan</div>'; return; }
+  bd.innerHTML = rows.map(r=>`<div class="sum-row"><div class="sum-row-name">${r.nom}: <strong style="color:var(--gold)">${r.dona}</strong> × ${r.narx.toLocaleString()}</div><div class="sum-row-val">${fmt(r.s)}</div></div>`).join('')
+    + `<div class="sum-row" style="border-top:1px solid rgba(232,160,48,0.25);margin-top:4px;padding-top:7px;"><div class="sum-row-name" style="font-weight:800;color:var(--cream)">Jami</div><div style="font-family:'Playfair Display',serif;font-size:1.05rem;font-weight:700;color:var(--gold2)">${fmt(total)}</div></div>`;
+};
+
+// ===== XARAJAT =====
+window.addX = () => { xRows.push({id:Date.now(),nom:'',sum:0}); renderX(); };
+window.delX = id => { xRows=xRows.filter(x=>x.id!==id); renderX(); };
+function renderX() {
+  const list = el('xList');
+  if (!xRows.length) { list.innerHTML='<div style="text-align:center;color:var(--muted);font-size:0.8rem;padding:8px;">Hozircha xarajat yo\'q</div>'; return; }
+  list.innerHTML = xRows.map(x=>`
+    <div class="x-row">
+      <input class="x-inp-nom" type="text" placeholder="Nomi (un, yog'...)" value="${x.nom}"
+        oninput="window._xr.find(r=>r.id==${x.id}).nom=this.value">
+      <input class="x-inp-sum" type="number" placeholder="0" value="${x.sum||''}"
+        oninput="window._xr.find(r=>r.id==${x.id}).sum=parseFloat(this.value)||0">
+      <span class="x-unit">so'm</span>
+      <button class="x-del" onclick="delX(${x.id})">✕</button>
+    </div>`).join('');
+  window._xr = xRows;
+}
+window._xr = xRows;
+
+// ===== SAVE ORDER =====
+window.saveOrder = async () => {
+  const mag = el('magNom').value.trim();
+  if (!mag) { toast('⚠️ Magazin nomini kiriting!'); return; }
+  const items=[]; let total=0;
+  PRODS.forEach(id=>{
+    const dona=parseInt(el('val-'+id).value)||0;
+    const narx=parseFloat(el('narx-'+id).value)||0;
+    if(dona>0){items.push({id,nom:NAMES[id],dona,narx,sum:dona*narx});total+=dona*narx;}
+  });
+  if (!items.length) { toast('⚠️ Kamida 1 ta mahsulot tanlang!'); return; }
+  const kun=el('d-kun').value, oy=el('d-oy').value, yil=el('d-yil').value;
+  const sana=kun&&oy&&yil?`${kun.padStart(2,'0')}.${oy.padStart(2,'0')}.${yil}`:new Date().toLocaleDateString('uz-UZ');
+  const tel=el('telefon').value;
+  const xTotal=xRows.reduce((a,x)=>a+(x.sum||0),0);
+  const xDetail=xRows.filter(x=>x.sum>0).map(x=>({nom:x.nom,sum:x.sum}));
+  try {
+    await addDoc(collection(db,'buyurtmalar'),{
+      mag,tel,sana,items,total,xarajat:xTotal,xarajatDetail:xDetail,
+      paid:false,userId:CU.uid,userName:CU.displayName||CU.email,createdAt:serverTimestamp()
+    });
+    toast('✅ Saqlandi!');
+    xRows=[]; window._xr=xRows; renderX();
+    clearForm();
+    if (el('myHistPanel').style.display!=='none') loadMyHist();
+  } catch(e) { toast('❌ Xatolik: '+e.message); }
+};
+
+function clearForm() {
+  el('magNom').value=''; el('telefon').value='';
+  PRODS.forEach(id=>{ el('val-'+id).value=''; if(sel[id]) toggleProd(id); });
+  initDate(); calcSum();
+}
+function initDate() {
+  const n=new Date();
+  el('d-kun').value=n.getDate(); el('d-oy').value=n.getMonth()+1; el('d-yil').value=n.getFullYear();
+}
+
+// ===== WORKER HISTORY =====
+let myHistOpen=false;
+window.toggleMyHist = () => {
+  myHistOpen=!myHistOpen;
+  el('myHistPanel').style.display=myHistOpen?'block':'none';
+  el('myHistBtn').textContent=myHistOpen?'📋 Yopish':'📋 Mening buyurtmalarim';
+  if(myHistOpen) loadMyHist();
+};
+async function loadMyHist() {
+  const list=el('myHistList');
+  list.innerHTML='<div style="text-align:center;color:var(--muted);padding:18px;">Yuklanmoqda...</div>';
+  const q=query(collection(db,'buyurtmalar'),orderBy('createdAt','desc'));
+  const snap=await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js').then(m=>m.getDocs(q)).catch(()=>null);
+  if(!snap){list.innerHTML='<div style="color:var(--red);padding:14px;">Xatolik!</div>';return;}
+  const orders=[];
+  snap.forEach(d=>{const data=d.data();if(data.userId===CU.uid)orders.push({...data,docId:d.id});});
+  renderOrders(list,orders,false);
+}
+
+// ===== RENDER ORDERS =====
+function renderOrders(container, orders, isAdm) {
+  if(!orders.length){container.innerHTML='<div style="text-align:center;color:var(--muted);padding:28px;font-size:0.84rem;">Buyurtma yo\'q</div>';return;}
+  container.innerHTML=orders.map(o=>{
+    const paid=o.paid||false;
+    const badge=paid?'<span class="badge-paid">✓ To\'landi</span>':'<span class="badge-qarz">Qarz</span>';
+    const userB=isAdm?`<span class="badge-user">👤 ${o.userName||''}</span>`:'';
+    const tolandiBtn=!paid?`<button class="btn-g" onclick="markPaid('${o.docId}')">✅ To'landi</button>`:'';
+    const delBtn=isAdm?`<button class="btn-r" onclick="delOrder('${o.docId}')">🗑 O'chir</button>`:'';
+    return`<div class="hist-item${paid?' paid':''}">
+      <div class="hist-top">
+        <div>
+          <div class="hist-mag">${o.mag} ${badge}${userB}</div>
+          <div class="hist-meta">📅 ${o.sana}${o.tel?' · 📞 +998'+o.tel:''}</div>
+        </div>
+      </div>
+      <div class="hist-prods">${(o.items||[]).map(i=>`<div class="hist-prod">${i.nom}: <span>${i.dona}</span></div>`).join('')}</div>
+      ${o.xarajat?`<div style="font-size:0.72rem;color:#FF9A3C;margin-top:4px;">💸 Xarajat: ${fmt(o.xarajat)}</div>`:''}
+      <div class="hist-foot">
+        <div class="hist-sum">${fmt(o.total)}</div>
+        <div class="hist-acts">${tolandiBtn}${delBtn}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ===== MARK PAID / DELETE =====
+window.markPaid = async docId => {
+  try { await updateDoc(doc(db,'buyurtmalar',docId),{paid:true,paidAt:serverTimestamp()}); toast('✅ To\'landi!'); }
+  catch { toast('❌ Xatolik!'); }
+};
+window.delOrder = async docId => {
+  if(!confirm('O\'chirasizmi?')) return;
+  try { await deleteDoc(doc(db,'buyurtmalar',docId)); toast('🗑 O\'chirildi!'); }
+  catch { toast('❌ Xatolik!'); }
+};
+
+// ===== ADMIN REALTIME =====
+function startListen() {
+  if(unsub) unsub();
+  const q=query(collection(db,'buyurtmalar'),orderBy('createdAt','desc'));
+  unsub=onSnapshot(q, snap=>{
+    admAllOrders=[];
+    snap.forEach(d=>admAllOrders.push({...d.data(),docId:d.id}));
+    admFilter(admCurFilter);
+    calcStats();
+  });
+}
+window.admFilter = f => {
+  admCurFilter=f;
+  let list=admAllOrders;
+  if(f==='pending') list=admAllOrders.filter(o=>!o.paid);
+  if(f==='paid') list=admAllOrders.filter(o=>o.paid);
+  renderOrders(el('admOrders'),list,true);
+};
+
+// ===== ADMIN TABS =====
+window.aTab = (name,btn) => {
+  ['Orders','Stats','Narx'].forEach(t=>{ el('aTab'+t).style.display=t.toLowerCase()===name?'block':'none'; });
+  document.querySelectorAll('.atab').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  if(name==='stats') calcStats();
+};
+
+// ===== STATS =====
+window.calcStats = () => {
+  const orders=admAllOrders;
+  const n=new Date();
+  const todayStr=`${String(n.getDate()).padStart(2,'0')}.${String(n.getMonth()+1).padStart(2,'0')}.${n.getFullYear()}`;
+  const selOy=parseInt(el('statOy')?.value??n.getMonth());
+  const selYil=parseInt(el('statYil')?.value??n.getFullYear());
+
+  const tod=orders.filter(o=>o.sana===todayStr);
+  const kT=tod.reduce((a,o)=>a+o.total,0);
+  const kX=tod.reduce((a,o)=>a+(o.xarajat||0),0);
+  const kF=kX>0?kT-kX:null;
+  const kQ=tod.filter(o=>!o.paid).reduce((a,o)=>a+o.total,0);
+
+  const oy=orders.filter(o=>{const p=o.sana.split('.');return p.length>=3&&parseInt(p[1])-1===selOy&&parseInt(p[2])===selYil;});
+  const oT=oy.reduce((a,o)=>a+o.total,0);
+  const oX=oy.reduce((a,o)=>a+(o.xarajat||0),0);
+  const oF=oX>0?oT-oX:null;
+  const oQ=oy.filter(o=>!o.paid).reduce((a,o)=>a+o.total,0);
+  const pc=oy.filter(o=>o.paid).length;
+  const uc=oy.filter(o=>!o.paid).length;
+
+  const sv=(id,v,cls)=>{const e=el(id);if(!e)return;e.textContent=v;e.className='mini-val '+(cls||'');};
+  sv('st-kt',kT>0?fmtV(kT)+' so\'m':'—','green');
+  sv('st-kx',kX>0?fmtV(kX)+' so\'m':'—','red');
+  sv('st-kf',kF!==null?fmtV(kF)+' so\'m':'—',kF!==null?(kF>=0?'green':'red'):'');
+  sv('st-kq',kQ>0?fmtV(kQ)+' so\'m':'—','orange');
+  sv('st-ot',oT>0?fmtV(oT)+' so\'m':'—','green');
+  sv('st-ox',oX>0?fmtV(oX)+' so\'m':'—','red');
+  sv('st-of',oF!==null?fmtV(oF)+' so\'m':'—',oF!==null?(oF>=0?'green':'red'):'');
+  sv('st-oq',oQ>0?fmtV(oQ)+' so\'m':'—','orange');
+  sv('st-pc',pc>0?pc+' ta':'—','green');
+  sv('st-uc',uc>0?uc+' ta':'—','orange');
+};
+
+// ===== NARXLAR (Firestore) =====
+async function loadNarxlar() {
+  try {
+    const snap=await getDoc(doc(db,'settings','narxlar'));
+    if(snap.exists()){
+      const s=snap.data();
+      PRODS.forEach(id=>{
+        if(s[id]){
+          const ni=el('narx-'+id),si=el('sett-'+id);
+          if(ni) ni.value=s[id];
+          if(si) si.value=s[id];
+        }
+      });
+      calcSum();
+    }
+  } catch {}
+}
+async function loadAdmNarx() {
+  try {
+    const snap=await getDoc(doc(db,'settings','narxlar'));
+    if(snap.exists()){const s=snap.data();PRODS.forEach(id=>{const e=el('an-'+id);if(e&&s[id])e.value=s[id];});}
+  } catch {}
+}
+window.applyNarx = () => {
+  PRODS.forEach(id=>{const si=el('sett-'+id),ni=el('narx-'+id);if(si&&ni&&si.value)ni.value=si.value;});
+  calcSum();
+};
+window.saveNarxlar = async () => {
+  const s={};
+  PRODS.forEach(id=>{const v=el('sett-'+id)?.value;if(v)s[id]=parseFloat(v);});
+  try { await setDoc(doc(db,'settings','narxlar'),s,{merge:true}); toast('✅ Narxlar saqlandi!'); applyNarx(); }
+  catch { toast('❌ Xatolik!'); }
+};
+window.saveAdmNarx = async () => {
+  const s={};
+  PRODS.forEach(id=>{const v=el('an-'+id)?.value;if(v)s[id]=parseFloat(v);});
+  try { await setDoc(doc(db,'settings','narxlar'),s,{merge:true}); toast('✅ Narxlar saqlandi va tarqatildi!'); }
+  catch { toast('❌ Xatolik!'); }
+};
+
+// ===== SETTINGS TOGGLE =====
+let settOpen=false;
+window.toggleSett = () => {
+  settOpen=!settOpen;
+  el('settPanel').style.display=settOpen?'block':'none';
+  el('settBtn').textContent=settOpen?'⚙️ Yopish':'⚙️ Narxlarni Sozlash';
+};
+</script>
+</body>
+</html>
